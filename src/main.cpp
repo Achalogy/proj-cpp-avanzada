@@ -39,7 +39,8 @@ int main(void)
   cout << "|                                         |" << endl;
   cout << "|               PRESS START               |" << endl;
   cout << "|             © 2024 Acha inc             |" << endl;
-  cout << "+-----------------------------------------+" << endl;
+  cout << "+-----------------------------------------+" << endl
+       << endl;
 
   while (true)
   {
