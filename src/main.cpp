@@ -7,21 +7,21 @@ using namespace std;
 struct SPokemon
 {
   char name[20];
-  short level;
-  short attack;
-  short live;
-  short speed;
+  short level = 0;
+  short attack = 0;
+  short live = 0;
+  short speed = 0;
   SPokemon *previous;
   SPokemon *next;
-  bool mainPlayer;
-  int game;
+  bool mainPlayer = false;
+  int game = 0;
 };
 
 struct SPlayer
 {
   char name[20];
-  bool mainPlayer;
-  int game;
+  bool mainPlayer = false;
+  int game = 0;
   SPokemon *team;
 };
 
