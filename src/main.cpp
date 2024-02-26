@@ -8,6 +8,7 @@ void crearPartida();
 void pause();
 void clearConsole();
 void renderMessage(string str);
+void menuPrincipal();
 
 struct SPokemon
 {
@@ -223,6 +224,11 @@ void crearPartida()
   renderMessage("¡Vivirás emocionantes aventuras junto a humanos y Pokémon!");
   pause();
 
+  menuPrincipal();
+}
+
+void menuPrincipal()
+{
   string *opciones = new string[4];
 
   *(opciones) = "Mostrar pokemones";
