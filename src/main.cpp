@@ -64,6 +64,7 @@ int main(void)
 
   while (true)
   {
+    clearConsole();
     int opt = crearMenuApuntadores(3, opciones);
     cin.ignore(); // Ya que se envia un número
 
@@ -75,6 +76,7 @@ int main(void)
     case 2:
       break;
     case 3:
+      clearConsole();
       return 0;
       break;
 
@@ -345,6 +347,7 @@ void intercambiarPokemones()
   cin.ignore();
 
   mostrarPokemones(jugador);
+  renderMessage("Posiciones intercambiadas con exito.");
 }
 
 void menuPrincipal()
