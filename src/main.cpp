@@ -6,6 +6,7 @@ int crearMenuApuntadores(int cantOpciones, string *opciones);
 void crearPartida();
 void pause();
 void clearConsole();
+void renderMessage(string str);
 
 struct SPokemon
 {
@@ -40,14 +41,16 @@ int main(void)
   *(opciones + 1) = "Cargar partida";
   *(opciones + 2) = "Salir";
 
-  cout << "+-----------------------------------------+" << endl;
-  cout << "|                 POKÉMON                 |" << endl;
-  cout << "|          Edición Programación           |" << endl;
-  cout << "|                                         |" << endl;
-  cout << "|               PRESS START               |" << endl;
-  cout << "|             © 2024 Acha inc             |" << endl;
-  cout << "+-----------------------------------------+" << endl
+  cout << "+--------------------------------------------------------------+" << endl;
+  cout << "|                           POKÉMON                            |" << endl;
+  cout << "|                    Edición Programación                      |" << endl;
+  cout << "|                                                              |" << endl;
+  cout << "|                         PRESS START                          |" << endl;
+  cout << "|                       © 2024 Acha inc                        |" << endl;
+  cout << "+--------------------------------------------------------------+" << endl
        << endl;
+
+  pause();
 
   while (true)
   {
@@ -78,7 +81,7 @@ void pause()
   do
   {
     cout << '\n'
-         << "Presiona una tecla para continuar... ";
+         << "Presiona enter para continuar... ";
   } while (cin.get() != '\n');
   clearConsole();
 }
@@ -88,15 +91,14 @@ void crearPartida()
   string nombre;
 
   clearConsole();
-  cout << "¡Te doy la bienvenida al mundo de los Pokémon!" << endl;
+  renderMessage("¡Te doy la bienvenida al mundo de los Pokémon!");
   pause();
-  cout << "Me llamo Acha y soy el Profesor Pokémon de la región de Jave." << endl;
+  renderMessage("Me llamo Acha y soy el Profesor Pokémon de la región de Jave.");
   pause();
-  cout << "¡Este mundo está lleno de unas criaturitas adorables llamadas Pokémon!" << endl;
+  renderMessage("¡Este mundo está lleno de unas criaturitas desdichadas (Álgebra) llamadas Pokémon!");
   pause();
-  cout << "Y ahora, háblame un poco de ti. Veamos..." << endl;
-  cout << "¿Cómo te llamas?" << endl
-       << endl
+  renderMessage("Y ahora, háblame un poco de ti. Veamos... ¿Cómo te llamas?");
+  cout << endl
        << " > ";
 
   cin >> nombre;
@@ -108,6 +110,76 @@ void crearPartida()
   strcpy(enemigo->name, "Alain");
   enemigo->team = NULL;
   enemigo->game = partidasGuardadas + 1;
+
+  cin.ignore();
+  pause();
+}
+
+int getSizeWithoutAccents(const string &str)
+{
+  int size = 0;
+  int accents = 0;
+
+  for (int i = 0; i < str.size(); i++)
+  {
+    char c = str[i];
+    size++;
+    if (!(c >= 32 && c <= 122))
+      accents++;
+  }
+
+  return size - (accents / 2);
+}
+
+string padEnd(string str, int size)
+{
+  // Agrega espacios al final
+
+  int strSize = getSizeWithoutAccents(str);
+
+  for (int i = 0; i < size - strSize; i++)
+    str += " ";
+
+  return str;
+}
+
+void renderMessage(string str)
+{
+  int size = str.size();
+  int line = 1;
+  int i = 0;
+  int a = 0;
+  string word = "";
+  int prevSize = 0;
+
+  cout << "+--------------------------------------------------------------+" << endl;
+
+  for (line; line <= 3; line++)
+  {
+    string renderLine = "";
+    prevSize = word.size();
+
+    for (a; a < (60 * line) - prevSize && i <= size + 1; a++)
+    {
+      if (str[i] == ' ' || str[i] == '\0')
+      {
+        renderLine += word + " ";
+        word = "";
+      }
+      else
+        word += str[i];
+
+      i++;
+    }
+    a = 60 * line;
+    cout
+        << "| ";
+    cout << padEnd(renderLine, 60);
+    cout << " |" << endl;
+    renderLine = "";
+  }
+
+  cout << "+--------------------------------------------------------------+" << endl;
 }
 
 int crearMenuApuntadores(int cantOpciones, string *opciones)
@@ -116,12 +188,12 @@ int crearMenuApuntadores(int cantOpciones, string *opciones)
 
   int opcionInput = -1;
 
-  cout << "===========================================" << endl;
+  cout << "+--------------------------------------------------------------+" << endl;
   do
   {
     for (int i = 0; i < cantOpciones; i++)
-      cout << i + 1 << ". " << *(opciones + i) << endl;
-    cout << "===========================================" << endl
+      cout << "| " << padEnd(to_string(i + 1) + ". " + *(opciones + i), 60) << " |" << endl;
+    cout << "+--------------------------------------------------------------+" << endl
          << endl;
     cout << " > ";
 
