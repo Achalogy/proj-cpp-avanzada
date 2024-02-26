@@ -31,7 +31,7 @@ void pause();
 void clearConsole();
 void renderMessage(string str);
 void menuPrincipal();
-void mostrarPokemones(SPlayer *jugador);
+void mostrarPokemones(SPlayer *jugador, int h1, int h2);
 string padEnd(string str, int size);
 
 SPlayer *jugador = new SPlayer;
@@ -163,23 +163,25 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
   file.close();
 }
 
-void mostrarPokemones(SPlayer *jugador)
+void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
 {
-  SPokemon *actual = jugador->team;
+  SPokemon *actual = p->team;
+  int i = 0;
 
   do
   {
     // cout << "Dirección: " << actual << endl;
     cout << "+--------------------------------+" << endl;
-    cout << "| " << padEnd("Nombre: " + (string)actual->name, 30) << " |" << endl;
-    cout << "| " << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
-    cout << "| " << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
-    cout << "| " << padEnd("Velocidad: " + to_string(actual->speed), 30) << " |" << endl;
-    cout << "| " << padEnd("Nivel:     " + to_string(actual->level), 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre: " + (string)actual->name, 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Velocidad: " + to_string(actual->speed), 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nivel:     " + to_string(actual->level), 30) << " |" << endl;
     // cout << "Siguiente: " << actual->next << endl;
     // cout << "Anterior:  " << actual->previous << endl
     actual = actual->next;
-  } while (actual != jugador->team);
+    i++;
+  } while (actual != p->team);
   cout << "+--------------------------------+" << endl;
 }
 
@@ -237,6 +239,109 @@ void crearPartida()
   menuPrincipal();
 }
 
+int contarPokemones(SPlayer *p)
+{
+  SPokemon *actual = p->team;
+  int i = 0;
+
+  do
+  {
+    actual = actual->next;
+    i++;
+  } while (actual != p->team);
+
+  return i;
+}
+
+SPokemon *encontrarDirPokemon(SPlayer *p, int pos)
+{
+  SPokemon *actual = p->team;
+  int i = 0;
+
+  do
+  {
+    if (i == pos)
+      return actual;
+
+    i++;
+    actual = actual->next;
+  } while (actual != p->team);
+
+  return p->team; // en caso de error retornar la primer pos
+}
+
+void intercambiarPokemones()
+{
+  int pos1 = 0;
+  int pos2 = 0;
+  int max = contarPokemones(jugador);
+  int confirmation = -1;
+
+  do
+  {
+    clearConsole();
+    mostrarPokemones(jugador);
+    renderMessage("¿Que posición inicial desea intercambiar? (0 para cancelar)");
+    cout << " > ";
+    cin >> pos1;
+    pos1--;
+
+    if (pos1 == -1)
+      return;
+  } while (pos1 <= 0 && pos1 > max);
+  do
+  {
+    clearConsole();
+    mostrarPokemones(jugador, pos1);
+    renderMessage("¿A que posición desea intercambiar? (0 para cancelar)");
+    cout << " > ";
+    cin >> pos2;
+    pos2--;
+
+    if (pos2 == -1)
+      return;
+  } while (pos2 <= 0 && pos2 > max);
+  mostrarPokemones(jugador, pos1, pos2);
+
+  cin.ignore();
+
+  renderMessage("Confirmas que deseas intercambiar las posiciones " + to_string(pos1 + 1) + " y " + to_string(pos2 + 1) + "? (y/n)");
+
+  do
+  {
+    char i;
+    cout << "> ";
+    cin >> i;
+
+    confirmation = (i == 'y' || i == 'Y') ? 1 : (i == 'n' || i == 'N') ? 0
+                                                                       : -1;
+  } while (confirmation == -1);
+
+  if (confirmation == 0)
+    return;
+
+  SPokemon *dir1 = encontrarDirPokemon(jugador, pos1);
+  SPokemon *dir2 = encontrarDirPokemon(jugador, pos2);
+
+  SPokemon aux = *dir1;
+
+  dir1->attack = dir2->attack;
+  dir1->level = dir2->level;
+  dir1->live = dir2->live;
+  strcpy(dir1->name, dir2->name);
+  dir1->speed = dir2->speed;
+
+  dir2->attack = aux.attack;
+  dir2->level = aux.level;
+  dir2->live = aux.live;
+  strcpy(dir2->name, aux.name);
+  dir2->speed = aux.speed;
+
+  cin.ignore();
+
+  mostrarPokemones(jugador);
+}
+
 void menuPrincipal()
 {
   string *opciones = new string[4];
@@ -257,6 +362,7 @@ void menuPrincipal()
       mostrarPokemones(jugador);
       break;
     case 2:
+      intercambiarPokemones();
       break;
     case 3:
       break;
