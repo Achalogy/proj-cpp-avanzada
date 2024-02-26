@@ -33,6 +33,11 @@ void renderMessage(string str);
 void menuPrincipal();
 void mostrarPokemones(SPlayer *jugador, int h1, int h2);
 string padEnd(string str, int size);
+void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer);
+int contarPokemones(SPlayer *p);
+SPokemon *encontrarDirPokemon(SPlayer *p, int pos);
+void intercambiarPokemones();
+int getSizeWithoutAccents(string str);
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
@@ -376,7 +381,7 @@ void menuPrincipal()
   }
 }
 
-int getSizeWithoutAccents(const string &str)
+int getSizeWithoutAccents(string str)
 {
   int size = 0;
   int accents = 0;
