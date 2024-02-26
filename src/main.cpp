@@ -3,12 +3,6 @@
 #include <fstream>
 
 using namespace std;
-int crearMenuApuntadores(int cantOpciones, string *opciones);
-void crearPartida();
-void pause();
-void clearConsole();
-void renderMessage(string str);
-void menuPrincipal();
 
 struct SPokemon
 {
@@ -30,6 +24,15 @@ struct SPlayer
   int game = 0;
   SPokemon *team;
 };
+
+int crearMenuApuntadores(int cantOpciones, string *opciones);
+void crearPartida();
+void pause();
+void clearConsole();
+void renderMessage(string str);
+void menuPrincipal();
+void mostrarPokemones(SPlayer *jugador);
+string padEnd(string str, int size);
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
@@ -108,6 +111,9 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
 
       if (c == '-' || (i + 1) == line.size())
       {
+        if (i + 1 == line.size())
+          value += c;
+
         // Asignar valores a la estructura
         if (prop == "nombre")
           strcpy(pokemon->name, value.c_str());
@@ -152,25 +158,29 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
     }
   }
 
-  // SPokemon *actual = primero;
-
-  // for (int i = 0; i < 4; i++)
-  // {
-  //   actual = actual->next;
-  //   cout << "Dirección: " << actual << endl;
-  //   cout << "Nombre:    " << actual->name << endl;
-  //   cout << "Ataque:    " << actual->attack << endl;
-  //   cout << "Vida:      " << actual->live << endl;
-  //   cout << "Velocidad: " << actual->speed << endl;
-  //   cout << "Nivel:     " << actual->level << endl;
-  //   cout << "Siguiente: " << actual->next << endl;
-  //   cout << "Anterior:  " << actual->previous << endl
-  //        << endl;
-  // }
-
   jugador->team = primero;
 
   file.close();
+}
+
+void mostrarPokemones(SPlayer *jugador)
+{
+  SPokemon *actual = jugador->team;
+
+  do
+  {
+    // cout << "Dirección: " << actual << endl;
+    cout << "+--------------------------------+" << endl;
+    cout << "| " << padEnd("Nombre: " + (string)actual->name, 30) << " |" << endl;
+    cout << "| " << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
+    cout << "| " << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
+    cout << "| " << padEnd("Velocidad: " + to_string(actual->speed), 30) << " |" << endl;
+    cout << "| " << padEnd("Nivel:     " + to_string(actual->level), 30) << " |" << endl;
+    // cout << "Siguiente: " << actual->next << endl;
+    // cout << "Anterior:  " << actual->previous << endl
+    actual = actual->next;
+  } while (actual != jugador->team);
+  cout << "+--------------------------------+" << endl;
 }
 
 void pause()
@@ -234,12 +244,29 @@ void menuPrincipal()
   *(opciones) = "Mostrar pokemones";
   *(opciones + 1) = "Reordenar";
   *(opciones + 2) = "Luchar";
-  *(opciones + 2) = "Guardar y Salir";
+  *(opciones + 3) = "Guardar y Salir";
 
   while (true)
   {
-    int opt = crearMenuApuntadores(3, opciones);
+    int opt = crearMenuApuntadores(4, opciones);
     cin.ignore(); // Ya que se envia un número
+
+    switch (opt)
+    {
+    case 1:
+      mostrarPokemones(jugador);
+      break;
+    case 2:
+      break;
+    case 3:
+      break;
+    case 4:
+      return;
+      break;
+    }
+
+    pause();
+    clearConsole();
   }
 }
 
@@ -263,10 +290,18 @@ string padEnd(string str, int size)
 {
   // Agrega espacios al final
 
+  if (str.back() == '\r')
+  {
+    // Fix: Al intentar agregar espacios a un string, si termina con \r se reemplazaran los primeros char
+    str.pop_back();
+  }
+
   int strSize = getSizeWithoutAccents(str);
 
   for (int i = 0; i < size - strSize; i++)
-    str += " ";
+  {
+    str = str + " ";
+  }
 
   return str;
 }
@@ -316,9 +351,9 @@ int crearMenuApuntadores(int cantOpciones, string *opciones)
 
   int opcionInput = -1;
 
-  cout << "+--------------------------------------------------------------+" << endl;
   do
   {
+    cout << "+--------------------------------------------------------------+" << endl;
     for (int i = 0; i < cantOpciones; i++)
       cout << "| " << padEnd(to_string(i + 1) + ". " + *(opciones + i), 60) << " |" << endl;
     cout << "+--------------------------------------------------------------+" << endl
