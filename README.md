@@ -1,5 +1,5 @@
 # Integrantes
 
 - Miguel Francisco Vargas Contreras
-- Sara Urueña Rodriguez
+- Sara Rodriguez Urueña
 - Maria Paula Sanabria Cristancho
