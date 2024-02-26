@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 using namespace std;
 int crearMenuApuntadores(int cantOpciones, string *opciones);
@@ -76,6 +77,101 @@ int main(void)
   return 0;
 }
 
+void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
+{
+  ifstream file;
+  string line;
+  int a = 0;
+
+  SPokemon *primero = NULL;
+  SPokemon *anterior = NULL;
+
+  file.open(path);
+
+  if (!file.is_open())
+  {
+    cout << "No se puede escribir el archivo" << endl;
+  }
+
+  while (!file.eof())
+  {
+    SPokemon *pokemon = new SPokemon;
+    getline(file, line);
+    string prop = "";
+    string value = "";
+    bool flag = false;
+
+    for (int i = 0; i < line.size(); i++)
+    {
+      char c = line[i];
+
+      if (c == '-' || (i + 1) == line.size())
+      {
+        // Asignar valores a la estructura
+        if (prop == "nombre")
+          strcpy(pokemon->name, value.c_str());
+        if (prop == "ataque")
+          pokemon->attack = (short)stoi(value);
+        if (prop == "vida")
+          pokemon->live = (short)stoi(value);
+        if (prop == "velocidad")
+          pokemon->speed = (short)stoi(value);
+        if (prop == "nivel")
+          pokemon->level = (short)stoi(value);
+
+        prop = "";
+        value = "";
+        flag = false;
+
+        if ((i + 1) == line.size())
+        {
+          pokemon->next = NULL;
+          pokemon->previous = NULL;
+          pokemon->game = partidasGuardadas;
+          pokemon->mainPlayer = mainPlayer;
+
+          if (!primero)
+            primero = pokemon;
+          else
+          {
+            anterior->next = pokemon;
+            pokemon->previous = anterior;
+          }
+          pokemon->next = primero;
+          anterior = pokemon;
+          primero->previous = pokemon;
+        }
+      }
+      else if (c == ':')
+        flag = true;
+      else if (flag)
+        value += c;
+      else
+        prop += c;
+    }
+  }
+
+  // SPokemon *actual = primero;
+
+  // for (int i = 0; i < 4; i++)
+  // {
+  //   actual = actual->next;
+  //   cout << "Dirección: " << actual << endl;
+  //   cout << "Nombre:    " << actual->name << endl;
+  //   cout << "Ataque:    " << actual->attack << endl;
+  //   cout << "Vida:      " << actual->live << endl;
+  //   cout << "Velocidad: " << actual->speed << endl;
+  //   cout << "Nivel:     " << actual->level << endl;
+  //   cout << "Siguiente: " << actual->next << endl;
+  //   cout << "Anterior:  " << actual->previous << endl
+  //        << endl;
+  // }
+
+  jugador->team = primero;
+
+  file.close();
+}
+
 void pause()
 {
   do
@@ -101,18 +197,44 @@ void crearPartida()
   cout << endl
        << " > ";
 
+  partidasGuardadas++;
+
   cin >> nombre;
   strcpy(jugador->name, nombre.c_str());
   jugador->mainPlayer = true;
   jugador->team = NULL;
-  jugador->game = partidasGuardadas + 1;
+  jugador->game = partidasGuardadas;
+
+  cin.ignore();
+
+  clearConsole();
+  renderMessage("¿Así que te llamas " + nombre + "?");
+  pause();
 
   strcpy(enemigo->name, "Alain");
   enemigo->team = NULL;
-  enemigo->game = partidasGuardadas + 1;
+  enemigo->game = partidasGuardadas;
 
-  cin.ignore();
+  cargarPokemones("main.txt", jugador, true);
+  cargarPokemones("enemy.txt", enemigo, false);
+
+  renderMessage("De acuerdo, " + nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
   pause();
+  renderMessage("¡Vivirás emocionantes aventuras junto a humanos y Pokémon!");
+  pause();
+
+  string *opciones = new string[4];
+
+  *(opciones) = "Mostrar pokemones";
+  *(opciones + 1) = "Reordenar";
+  *(opciones + 2) = "Luchar";
+  *(opciones + 2) = "Guardar y Salir";
+
+  while (true)
+  {
+    int opt = crearMenuApuntadores(3, opciones);
+    cin.ignore(); // Ya que se envia un número
+  }
 }
 
 int getSizeWithoutAccents(const string &str)

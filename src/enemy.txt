@@ -1,0 +1,4 @@
+nombre:Pidgeot-nivel:15-ataque:30-vida:110-velocidad:45
+velocidad:55-nombre:Arcanine-nivel:11-ataque:35-vida:100
+nivel:13-ataque:40-vida:130-velocidad:65-nombre:Golduck
+ataque:30-vida:190-velocidad:65-nombre:Flareon-nivel:12
