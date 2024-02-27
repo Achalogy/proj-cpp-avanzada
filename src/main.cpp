@@ -10,6 +10,7 @@ struct SPokemon
   short level = 0;
   short attack = 0;
   short live = 0;
+  short maxLive = 0;
   short speed = 0;
   SPokemon *previous;
   SPokemon *next;
@@ -33,6 +34,7 @@ void renderMessage(string str);
 void menuPrincipal();
 void mostrarPokemones(SPlayer *jugador, int h1, int h2);
 string padEnd(string str, int size);
+string padStart(string str, int size);
 void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer);
 int contarPokemones(SPlayer *p);
 SPokemon *encontrarDirPokemon(SPlayer *p, int pos);
@@ -121,13 +123,22 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
         if (i + 1 == line.size())
           value += c;
 
+        if (value.back() == '\r')
+        {
+          // Fix: Al intentar agregar espacios a un string, si termina con \r se reemplazaran los primeros char
+          value.pop_back();
+        }
+
         // Asignar valores a la estructura
         if (prop == "nombre")
           strcpy(pokemon->name, value.c_str());
         if (prop == "ataque")
           pokemon->attack = (short)stoi(value);
         if (prop == "vida")
+        {
           pokemon->live = (short)stoi(value);
+          pokemon->maxLive = (short)stoi(value);
+        }
         if (prop == "velocidad")
           pokemon->speed = (short)stoi(value);
         if (prop == "nivel")
@@ -308,10 +319,10 @@ void intercambiarPokemones()
     if (pos2 == -1)
       return;
   } while (pos2 <= 0 && pos2 > max);
-  mostrarPokemones(jugador, pos1, pos2);
-
   cin.ignore();
 
+  clearConsole();
+  mostrarPokemones(jugador, pos1, pos2);
   renderMessage("Confirmas que deseas intercambiar las posiciones " + to_string(pos1 + 1) + " y " + to_string(pos2 + 1) + "? (y/n)");
 
   do
@@ -350,6 +361,217 @@ void intercambiarPokemones()
   renderMessage("Posiciones intercambiadas con exito.");
 }
 
+int pokemonesVivos(SPlayer *p)
+{
+  SPokemon *actual = p->team;
+  int i = 0;
+
+  do
+  {
+    if (actual->live > 0)
+      i++;
+    actual = actual->next;
+  } while (actual != p->team);
+
+  return i;
+}
+
+string barraPokemones(int vivos, int muertos)
+{
+  string barra = "";
+
+  while (vivos--)
+    barra += "◒ ";
+  while (muertos--)
+    barra += "○ ";
+
+  return barra;
+}
+
+string PSBar(int c, int max)
+{
+  int psPoint = max / 12;
+
+  string bar = "";
+
+  for (int i = 0; i < c / psPoint; i++)
+    bar += "#";
+
+  for (int i = 0; i < 12 - c / psPoint; i++)
+    bar += "-";
+
+  return bar;
+}
+
+void renderBattle(SPokemon *poke1, SPokemon *poke2)
+{
+  int mainPkmCant = contarPokemones(jugador);
+  int enemigoPkmCant = contarPokemones(enemigo);
+
+  int mainPkmVivos = pokemonesVivos(jugador);
+  int enemigoPkmVivos = pokemonesVivos(enemigo);
+
+  cout << " " << barraPokemones(enemigoPkmVivos, enemigoPkmCant - enemigoPkmVivos) << endl;
+  cout << " " << padEnd(poke2->name, 25) << "Nv" << poke2->level << endl;
+  cout << padStart("PS" + PSBar(poke2->live, poke2->maxLive) + " " + to_string(poke2->live) + "/" + to_string(poke2->maxLive), 30) << endl;
+
+  cout << endl
+       << endl
+       << endl
+       << endl
+       << endl
+       << endl
+       << endl;
+
+  cout << padEnd("", 34) << barraPokemones(mainPkmVivos, mainPkmCant - mainPkmVivos) << endl;
+  cout << padStart(padEnd(poke1->name, 25) + "Nv" + to_string(poke1->level), 63) << endl;
+  cout << padStart("PS" + PSBar(poke1->live, poke1->maxLive) + " " + to_string(poke1->live) + "/" + to_string(poke1->maxLive), 63) << endl;
+}
+
+SPokemon *siguienteVivo(SPokemon *actual)
+{
+  SPokemon *retorno = actual;
+
+  while (retorno->live <= 0)
+  {
+    retorno = retorno->next;
+    if (retorno->name == actual->name)
+      break;
+  }
+
+  return retorno;
+}
+
+void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
+{
+  SPokemon **primero = (*poke1)->speed > (*poke2)->speed ? poke1 : poke2;
+  SPokemon **segundo = (*poke1)->speed > (*poke2)->speed ? poke2 : poke1;
+
+  (*segundo)->live -= (*primero)->attack;
+  if ((*segundo)->live <= 0)
+    (*segundo)->live = 0;
+
+  clearConsole();
+  renderBattle(*poke1, *poke2);
+  renderMessage((string)(*primero)->name + " ha realizado un ataque.");
+  pause();
+
+  if ((*segundo)->live > 0)
+  {
+    (*primero)->live -= (*segundo)->attack;
+    if ((*primero)->live <= 0)
+      (*primero)->live = 0;
+
+    clearConsole();
+    renderBattle(*poke1, *poke2);
+    renderMessage((string)(*segundo)->name + " ha realizado un ataque.");
+    pause();
+  }
+  else
+  {
+    clearConsole();
+    renderBattle(*poke1, *poke2);
+    renderMessage((string)(*segundo)->name + " se ha desmayado.");
+    pause();
+
+    if (*segundo == siguienteVivo(*segundo))
+      return;
+    (*segundo) = siguienteVivo(*segundo);
+    clearConsole();
+    renderBattle(*poke1, *poke2);
+    renderMessage("¡Adelante, " + (string)(*segundo)->name + "!");
+    pause();
+  }
+
+  if ((*primero)->live <= 0)
+  {
+    clearConsole();
+    renderBattle(*poke1, *poke2);
+    renderMessage((string)(*primero)->name + " se ha desmayado.");
+    pause();
+
+    if (*primero == siguienteVivo(*primero))
+      return;
+    (*primero) = siguienteVivo(*primero);
+    clearConsole();
+    renderBattle(*poke1, *poke2);
+    renderMessage("¡Adelante, " + (string)(*primero)->name + "!");
+    pause();
+  }
+}
+
+void batallaPokemon()
+{
+  SPokemon *poke1 = jugador->team;
+  SPokemon *poke2 = enemigo->team;
+
+  if (
+      pokemonesVivos(jugador) == 0 || pokemonesVivos(enemigo) == 0)
+    return; // Evitar problemas
+
+  clearConsole();
+  renderMessage("Bienvenido. Me presentaré: soy " + (string)enemigo->name + ", el Campeon.");
+  pause();
+  renderMessage("Entonces, ¿tú eres de quien tanto hablaba el profesor Acha?");
+  pause();
+  renderMessage("Venga, disfrutemos de un intenso combate.");
+  pause();
+
+  clearConsole();
+  renderBattle(poke1, poke2);
+  renderMessage("¡Adelante, " + (string)poke1->name + "!");
+  pause();
+
+  clearConsole();
+  renderBattle(poke1, poke2);
+  renderMessage("¡El campeon " + (string)enemigo->name + " saca a " + poke2->name + "!");
+  pause();
+
+  while (true)
+  {
+    if (
+        pokemonesVivos(jugador) == 0 || pokemonesVivos(enemigo) == 0)
+    {
+      clearConsole();
+      renderBattle(poke1, poke2);
+      if (pokemonesVivos(jugador) == 0) // TODO: cambiar mensajes
+        renderMessage("Has perdido :(");
+      else
+        renderMessage("Has ganado :D");
+      return;
+    }
+
+    clearConsole();
+    renderBattle(poke1, poke2);
+    renderMessage("¿Que deberia hacer " + (string)poke1->name + "?");
+    cout << endl;
+
+    string *opcionesLucha = new string[3];
+    *(opcionesLucha) = "Jugar Turno";
+    *(opcionesLucha + 1) = "Cambiar pokemon";
+    *(opcionesLucha + 2) = "Volver al menu principal";
+
+    int opt = crearMenuApuntadores(3, opcionesLucha);
+
+    cin.ignore();
+
+    switch (opt)
+    {
+    case 1:
+      realizarAtaque(&poke1, &poke2);
+      break;
+    case 2:
+      break;
+    case 3:
+      return;
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
 void menuPrincipal()
 {
   string *opciones = new string[4];
@@ -373,6 +595,7 @@ void menuPrincipal()
       intercambiarPokemones();
       break;
     case 3:
+      batallaPokemon();
       break;
     case 4:
       return;
@@ -404,17 +627,25 @@ string padEnd(string str, int size)
 {
   // Agrega espacios al final
 
-  if (str.back() == '\r')
-  {
-    // Fix: Al intentar agregar espacios a un string, si termina con \r se reemplazaran los primeros char
-    str.pop_back();
-  }
-
   int strSize = getSizeWithoutAccents(str);
 
   for (int i = 0; i < size - strSize; i++)
   {
     str = str + " ";
+  }
+
+  return str;
+}
+
+string padStart(string str, int size)
+{
+  // Agrega espacios al inicio
+
+  int strSize = getSizeWithoutAccents(str);
+
+  for (int i = 0; i < size - strSize; i++)
+  {
+    str = " " + str;
   }
 
   return str;
