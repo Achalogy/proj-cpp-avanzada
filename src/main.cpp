@@ -40,6 +40,13 @@ int contarPokemones(SPlayer *p);
 SPokemon *encontrarDirPokemon(SPlayer *p, int pos);
 void intercambiarPokemones();
 int getSizeWithoutAccents(string str);
+int pokemonesVivos(SPlayer *p);
+string barraPokemones(int vivos, int muertos);
+string PSBar(int c, int max);
+void renderBattle(SPokemon *poke1, SPokemon *poke2);
+SPokemon *siguienteVivo(SPokemon *actual);
+void realizarAtaque(SPokemon **poke1, SPokemon **poke2);
+void batallaPokemon();
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
