@@ -555,10 +555,13 @@ void batallaPokemon()
     {
       clearConsole();
       renderBattle(poke1, poke2);
-      if (pokemonesVivos(jugador) == 0) // TODO: cambiar mensajes
-        renderMessage("Has perdido :(");
+      if (pokemonesVivos(jugador) == 0)
+      {
+        renderMessage("Tus pokemones han dado todo de si. Pero haz perdido en contra de mi, " + (string)enemigo->name + " el campeón.");
+        renderMessage("Has perdido.");
+      }
       else
-        renderMessage("Has ganado :D");
+        renderMessage("¡El campeón " + (string)enemigo->name + " ha perdido!");
       return;
     }
 
