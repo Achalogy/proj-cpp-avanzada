@@ -486,7 +486,14 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
     (*segundo) = siguienteVivo(*segundo);
     clearConsole();
     renderBattle(*poke1, *poke2);
-    renderMessage("¡Adelante, " + (string)(*segundo)->name + "!");
+
+    if ((*segundo)->mainPlayer)
+    {
+      renderMessage("¡Adelante, " + (string)(*segundo)->name + "!");
+    }
+    else
+      renderMessage("¡El campeón " + (string)enemigo->name + " ha enviado a " + (string)(*segundo)->name + "!");
+
     pause();
   }
 
@@ -502,7 +509,14 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
     (*primero) = siguienteVivo(*primero);
     clearConsole();
     renderBattle(*poke1, *poke2);
-    renderMessage("¡Adelante, " + (string)(*primero)->name + "!");
+
+    if ((*primero)->mainPlayer)
+    {
+      renderMessage("¡Adelante, " + (string)(*primero)->name + "!");
+    }
+    else
+      renderMessage("¡El campeón " + (string)enemigo->name + " ha enviado a " + (string)(*primero)->name + "!");
+
     pause();
   }
 }
