@@ -478,7 +478,7 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
   {
     clearConsole();
     renderBattle(*poke1, *poke2);
-    renderMessage((string)(*segundo)->name + " se ha desmayado.");
+    renderMessage((string)(*segundo)->name + " se ha debilitado.");
     pause();
 
     if (*segundo == siguienteVivo(*segundo))
@@ -501,7 +501,7 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
   {
     clearConsole();
     renderBattle(*poke1, *poke2);
-    renderMessage((string)(*primero)->name + " se ha desmayado.");
+    renderMessage((string)(*primero)->name + " se ha debilitado.");
     pause();
 
     if (*primero == siguienteVivo(*primero))
