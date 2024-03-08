@@ -99,7 +99,6 @@ int main(void)
 
 void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
 {
-  cout << "a";
   ifstream file;
   string line;
   int a = 0;
@@ -111,7 +110,7 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
 
   if (!file.is_open())
   {
-    cout << "No se puede escribir el archivo" << endl;
+    cout << "No se puede leer el archivo" << endl;
   }
 
   while (!file.eof())
@@ -142,8 +141,10 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
         strcpy(pokemon->name, valor);
       if (strcmp(atrib, (char *)"velocidad") == 0)
         pokemon->speed = (short)stoi(valor);
-      if (strcmp(atrib, (char *)"vida") == 0)
+      if (strcmp(atrib, (char *)"vida") == 0) {
         pokemon->live = (short)stoi(valor);
+        pokemon->maxLive = (short)stoi(valor);
+      }
       if (strcmp(atrib, (char *)"nivel") == 0)
         pokemon->level = (short)stoi(valor);
       if (strcmp(atrib, (char *)"ataque") == 0)
@@ -236,14 +237,13 @@ void crearPartida()
   clearConsole();
   renderMessage("¿Así que te llamas " + nombre + "?");
   pause();
-  cout << "Hola";
 
   strcpy(enemigo->name, "Alain");
   enemigo->team = NULL;
   enemigo->game = partidasGuardadas;
 
   cargarPokemones("main.txt", jugador, true);
-  // cargarPokemones("enemy.txt", enemigo, false);
+  cargarPokemones("enemy.txt", enemigo, false);
 
   renderMessage("De acuerdo, " + nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
   pause();
@@ -728,11 +728,11 @@ int crearMenuApuntadores(int cantOpciones, string *opciones)
 
 void clearConsole()
 {
-  // Limpia la consola, usa un if para saber si es linux o windows
+  Limpia la consola, usa un if para saber si es linux o windows
 
-  // #ifdef _WIN32
-  //   system("cls");
-  // #else
-  //   system("clear");
-  // #endif
+  #ifdef _WIN32
+    system("cls");
+  #else
+    system("clear");
+  #endif
 }
