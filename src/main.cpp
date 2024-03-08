@@ -141,7 +141,8 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
         strcpy(pokemon->name, valor);
       if (strcmp(atrib, (char *)"velocidad") == 0)
         pokemon->speed = (short)stoi(valor);
-      if (strcmp(atrib, (char *)"vida") == 0) {
+      if (strcmp(atrib, (char *)"vida") == 0)
+      {
         pokemon->live = (short)stoi(valor);
         pokemon->maxLive = (short)stoi(valor);
       }
@@ -182,6 +183,8 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
   SPokemon *actual = p->team;
   int i = 0;
 
+  clearConsole();
+
   do
   {
     // cout << "Dirección: " << actual << endl;
@@ -211,7 +214,7 @@ void pause()
 
 void crearPartida()
 {
-  string nombre;
+  char nombre[50];
 
   clearConsole();
   renderMessage("¡Te doy la bienvenida al mundo de los Pokémon!");
@@ -227,7 +230,7 @@ void crearPartida()
   partidasGuardadas++;
 
   cin >> nombre;
-  strcpy(jugador->name, nombre.c_str());
+  strcpy(jugador->name, nombre);
   jugador->mainPlayer = true;
   jugador->team = NULL;
   jugador->game = partidasGuardadas;
@@ -235,7 +238,7 @@ void crearPartida()
   cin.ignore();
 
   clearConsole();
-  renderMessage("¿Así que te llamas " + nombre + "?");
+  renderMessage("¿Así que te llamas " + (string)nombre + "?");
   pause();
 
   strcpy(enemigo->name, "Alain");
@@ -245,7 +248,7 @@ void crearPartida()
   cargarPokemones("main.txt", jugador, true);
   cargarPokemones("enemy.txt", enemigo, false);
 
-  renderMessage("De acuerdo, " + nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
+  renderMessage("De acuerdo, " + (string)nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
   pause();
   renderMessage("¡Vivirás emocionantes aventuras junto a humanos y Pokémon!");
   pause();
@@ -730,9 +733,9 @@ void clearConsole()
 {
   // Limpia la consola, usa un if para saber si es linux o windows
 
-  #ifdef _WIN32
-    system("cls");
-  #else
-    system("clear");
-  #endif
+#ifdef _WIN32
+  system("cls");
+#else
+  system("clear");
+#endif
 }
