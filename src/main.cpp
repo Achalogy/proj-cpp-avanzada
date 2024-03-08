@@ -728,7 +728,7 @@ int crearMenuApuntadores(int cantOpciones, string *opciones)
 
 void clearConsole()
 {
-  Limpia la consola, usa un if para saber si es linux o windows
+  // Limpia la consola, usa un if para saber si es linux o windows
 
   #ifdef _WIN32
     system("cls");
