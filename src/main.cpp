@@ -99,6 +99,7 @@ int main(void)
 
 void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
 {
+  cout << "a";
   ifstream file;
   string line;
   int a = 0;
@@ -116,71 +117,58 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
   while (!file.eof())
   {
     SPokemon *pokemon = new SPokemon;
+
     getline(file, line);
-    string prop = "";
-    string value = "";
-    bool flag = false;
 
-    for (int i = 0; i < line.size(); i++)
+    if (line.back() == '\r')
+      line.pop_back();
+
+    char *lineC = (char *)line.c_str();
+    strcpy(lineC, line.c_str());
+
+    char *token;
+    token = strtok(lineC, "-");
+
+    while (token != NULL)
     {
-      char c = line[i];
+      char *valor = strstr(token, ":") + 1;
+      char *atrib = token;
+      int atribSize = strlen(token) - strlen(valor) - 1;
 
-      if (c == '-' || (i + 1) == line.size())
-      {
-        if (i + 1 == line.size())
-          value += c;
+      strncpy(atrib, token, atribSize);
+      atrib[atribSize] = '\0';
 
-        if (value.back() == '\r')
-        {
-          // Fix: Al intentar agregar espacios a un string, si termina con \r se reemplazaran los primeros char
-          value.pop_back();
-        }
+      if (strcmp(atrib, (char *)"nombre") == 0)
+        strcpy(pokemon->name, valor);
+      if (strcmp(atrib, (char *)"velocidad") == 0)
+        pokemon->speed = (short)stoi(valor);
+      if (strcmp(atrib, (char *)"vida") == 0)
+        pokemon->live = (short)stoi(valor);
+      if (strcmp(atrib, (char *)"nivel") == 0)
+        pokemon->level = (short)stoi(valor);
+      if (strcmp(atrib, (char *)"ataque") == 0)
+        pokemon->attack = (short)stoi(valor);
 
-        // Asignar valores a la estructura
-        if (prop == "nombre")
-          strcpy(pokemon->name, value.c_str());
-        if (prop == "ataque")
-          pokemon->attack = (short)stoi(value);
-        if (prop == "vida")
-        {
-          pokemon->live = (short)stoi(value);
-          pokemon->maxLive = (short)stoi(value);
-        }
-        if (prop == "velocidad")
-          pokemon->speed = (short)stoi(value);
-        if (prop == "nivel")
-          pokemon->level = (short)stoi(value);
-
-        prop = "";
-        value = "";
-        flag = false;
-
-        if ((i + 1) == line.size())
-        {
-          pokemon->next = NULL;
-          pokemon->previous = NULL;
-          pokemon->game = partidasGuardadas;
-          pokemon->mainPlayer = mainPlayer;
-
-          if (!primero)
-            primero = pokemon;
-          else
-          {
-            anterior->next = pokemon;
-            pokemon->previous = anterior;
-          }
-          pokemon->next = primero;
-          anterior = pokemon;
-          primero->previous = pokemon;
-        }
-      }
-      else if (c == ':')
-        flag = true;
-      else if (flag)
-        value += c;
-      else
-        prop += c;
+      token = strtok(NULL, "-");
     }
+
+    // te amo <3
+
+    pokemon->next = NULL;
+    pokemon->previous = NULL;
+    pokemon->game = partidasGuardadas;
+    pokemon->mainPlayer = mainPlayer;
+
+    if (!primero)
+      primero = pokemon;
+    else
+    {
+      anterior->next = pokemon;
+      pokemon->previous = anterior;
+    }
+    pokemon->next = primero;
+    anterior = pokemon;
+    primero->previous = pokemon;
   }
 
   jugador->team = primero;
@@ -248,13 +236,14 @@ void crearPartida()
   clearConsole();
   renderMessage("¿Así que te llamas " + nombre + "?");
   pause();
+  cout << "Hola";
 
   strcpy(enemigo->name, "Alain");
   enemigo->team = NULL;
   enemigo->game = partidasGuardadas;
 
   cargarPokemones("main.txt", jugador, true);
-  cargarPokemones("enemy.txt", enemigo, false);
+  // cargarPokemones("enemy.txt", enemigo, false);
 
   renderMessage("De acuerdo, " + nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
   pause();
@@ -741,9 +730,9 @@ void clearConsole()
 {
   // Limpia la consola, usa un if para saber si es linux o windows
 
-#ifdef _WIN32
-  system("cls");
-#else
-  system("clear");
-#endif
+  // #ifdef _WIN32
+  //   system("cls");
+  // #else
+  //   system("clear");
+  // #endif
 }
