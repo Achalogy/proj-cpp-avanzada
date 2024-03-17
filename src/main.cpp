@@ -48,6 +48,10 @@ SPokemon *siguienteVivo(SPokemon *actual);
 void realizarAtaque(SPokemon **poke1, SPokemon **poke2);
 void batallaPokemon();
 void cambiarPokemon(SPokemon **poke1, SPokemon **poke2);
+void leerPokemonesBin();
+int contarPartidasGuardadas();
+void guardarPartida();
+void cargarPartida();
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
@@ -56,6 +60,7 @@ int partidasGuardadas = 0;
 int main(void)
 {
   string *opciones = new string[3];
+  partidasGuardadas = contarPartidasGuardadas();
 
   *(opciones) = "Crear nueva partida";
   *(opciones + 1) = "Cargar partida";
@@ -84,6 +89,7 @@ int main(void)
       crearPartida();
       break;
     case 2:
+      cargarPartida();
       break;
     case 3:
       clearConsole();
@@ -96,6 +102,146 @@ int main(void)
   }
 
   return 0;
+}
+
+int contarPartidasGuardadas()
+{
+  ifstream jugadores;
+  jugadores.open("partidas.bin", ios::in | ios::out | ios::binary);
+
+  if (!jugadores.is_open())
+  {
+    cout << "Error abriendo el archivo de partidas guardadas, crearlo si no existe" << endl;
+    pause();
+    return 0;
+  }
+
+  jugadores.seekg(0, ios::end);
+  return (int)jugadores.tellg() / (sizeof(SPlayer) * 2);
+}
+
+void cargarPartida()
+{
+  clearConsole();
+  if (partidasGuardadas < 1)
+  {
+    renderMessage("No hay partidas guardadas");
+    pause();
+    return;
+  };
+
+  ifstream jugadores;
+  string *opciones = new string[partidasGuardadas];
+  jugadores.open("partidas.bin", ios::in | ios::out | ios::binary);
+
+  if (!jugadores.is_open())
+  {
+    cout << "Error abriendo el archivo de partidas guardadas, crearlo si no existe" << endl;
+    pause();
+    return;
+  }
+
+  for (int i = 1; i <= partidasGuardadas; i++)
+    *(opciones + i - 1) = "Partida " + to_string(i);
+  int opt = crearMenuApuntadores(partidasGuardadas, opciones);
+
+  jugadores.seekg((opt - 1) * sizeof(SPlayer) * 2);
+
+  jugadores.read((char *)jugador, sizeof(SPlayer));
+  jugadores.read((char *)enemigo, sizeof(SPlayer));
+
+  leerPokemonesBin();
+
+  renderMessage("Se ha cargado la partida con exito");
+  pause();
+  menuPrincipal();
+}
+
+void leerPokemonesBin()
+{
+  ifstream pokemones;
+  pokemones.open("pokemones.bin", ios::binary);
+  SPokemon *primero = NULL;
+  SPokemon *anterior = NULL;
+
+  pokemones.seekg((jugador->game - 1) * sizeof(SPokemon) * 8);
+
+  for (int i = 1; i <= 8; i++)
+  {
+    SPokemon *pokemon = new SPokemon;
+    pokemones.read((char *)pokemon, sizeof(SPokemon));
+
+    pokemon->next = NULL;
+    pokemon->previous = NULL;
+    pokemon->game = jugador->game;
+    pokemon->mainPlayer = i <= 4 ? true : false;
+
+    if (!primero)
+      primero = pokemon;
+    else
+    {
+      anterior->next = pokemon;
+      pokemon->previous = anterior;
+    }
+    pokemon->next = primero;
+    anterior = pokemon;
+    primero->previous = pokemon;
+
+    if (i == 4)
+    {
+      jugador->team = primero;
+      primero = NULL;
+      anterior = NULL;
+    }
+    else if (i == 8)
+    {
+      enemigo->team = primero;
+    }
+  }
+}
+
+void guardarPartida()
+{
+  ofstream jugadores;
+
+  jugadores.open("partidas.bin", ios::in | ios::out | ios::binary);
+
+  if (!jugadores.is_open())
+    cout << "Error abriendo el archivo";
+  pause();
+
+  jugadores.seekp((jugador->game - 1) * sizeof(SPlayer) * 2);
+
+  jugadores.write((char *)jugador, sizeof(SPlayer));
+  jugadores.write((char *)enemigo, sizeof(SPlayer));
+
+  ofstream pokemones;
+
+  pokemones.open("pokemones.bin", ios::in | ios::out | ios::binary);
+
+  pokemones.seekp((jugador->game - 1) * sizeof(SPokemon) * 8);
+
+  SPokemon *actual = jugador->team;
+  int i = 0;
+
+  do
+  {
+    pokemones.write((char *)actual, sizeof(SPokemon));
+    actual = actual->next;
+    i++;
+  } while (actual != jugador->team);
+
+  actual = enemigo->team;
+
+  do
+  {
+    pokemones.write((char *)actual, sizeof(SPokemon));
+    actual = actual->next;
+    i++;
+  } while (actual != enemigo->team);
+
+  renderMessage("La partida número " + to_string(jugador->game) + " ha sido guardada con exito");
+  pause();
 }
 
 void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
@@ -651,6 +797,7 @@ void menuPrincipal()
       batallaPokemon();
       break;
     case 4:
+      guardarPartida();
       return;
       break;
     }
