@@ -47,6 +47,7 @@ void renderBattle(SPokemon *poke1, SPokemon *poke2);
 SPokemon *siguienteVivo(SPokemon *actual);
 void realizarAtaque(SPokemon **poke1, SPokemon **poke2);
 void batallaPokemon();
+void cambiarPokemon(SPokemon **poke1, SPokemon **poke2);
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
@@ -577,15 +578,51 @@ void batallaPokemon()
       realizarAtaque(&poke1, &poke2);
       break;
     case 2:
+      cambiarPokemon(&poke1, &poke2);
       break;
     case 3:
       return;
-      break;
 
     default:
       break;
     }
   }
+}
+
+void cambiarPokemon(SPokemon **poke1, SPokemon **poke2)
+{
+  SPokemon *siguiente = (*poke1)->next;
+  SPokemon *anterior = (*poke1)->previous;
+
+  // renderMessage("Quieres cambiar a (1) " + (string)siguiente->name + " o quieres enviar a (2) " + (string)anterior->name);
+
+  clearConsole();
+  renderBattle(*poke1, *poke2);
+
+  string *opciones = new string[3];
+  *(opciones) = "Cambiar a (1) " + (string)siguiente->name;
+  *(opciones + 1) = "Cambiar a (2) " + (string)anterior->name;
+  *(opciones + 2) = "Cancelar";
+
+  int opt = crearMenuApuntadores(3, opciones);
+  cin.ignore();
+
+  clearConsole();
+  renderBattle(*poke1, *poke2);
+  switch (opt)
+  {
+  case 1:
+    renderMessage("Ok, " + (string)(*poke1)->name + " diste una buela pelea, adelante " + (string)siguiente->name);
+    *poke1 = siguiente;
+    break;
+  case 2:
+    renderMessage("Ok, " + (string)(*poke1)->name + " diste una buela pelea, adelante " + (string)anterior->name);
+    *poke1 = anterior;
+    break;
+  default:
+    return;
+  }
+  pause();
 }
 
 void menuPrincipal()
