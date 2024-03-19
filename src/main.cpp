@@ -61,6 +61,8 @@ int partidasGuardadas = 0;
 int main(void)
 {
   string *opciones = new string[3];
+
+  // Lo primero es contar la cantidad de partidas en el archivo
   partidasGuardadas = contarPartidasGuardadas();
 
   *(opciones) = "Crear nueva partida";
@@ -119,8 +121,8 @@ int contarPartidasGuardadas()
     return 0;
   }
 
-  jugadores.seekg(0, ios::end);
-  int r = (int)jugadores.tellg() / (sizeof(SPlayer) * 2);
+  jugadores.seekg(0, ios::end); // se mueve el apuntador al final
+  int r = (int)jugadores.tellg() / (sizeof(SPlayer) * 2); // se usa * 2 por que son dos jugadores
   jugadores.close();
   return r;
 }
@@ -137,7 +139,7 @@ void cargarPartida()
 
   ifstream jugadores;
   string *opciones = new string[partidasGuardadas];
-  jugadores.open("partidas.bin", ios::in | ios::out | ios::binary);
+  jugadores.open("partidas.bin", ios::binary);
 
   if (!jugadores.is_open())
   {
@@ -150,7 +152,7 @@ void cargarPartida()
     *(opciones + i - 1) = "Partida " + to_string(i);
   int opt = crearMenuApuntadores(partidasGuardadas, opciones);
 
-  jugadores.seekg((opt - 1) * sizeof(SPlayer) * 2);
+  jugadores.seekg((opt - 1) * sizeof(SPlayer) * 2); // se usa * 2 por que son dos jugadores
 
   jugadores.read((char *)jugador, sizeof(SPlayer));
   jugadores.read((char *)enemigo, sizeof(SPlayer));
@@ -164,7 +166,7 @@ void cargarPartida()
   delete[] opciones;
 
   pause();
-  menuPrincipal();
+  menuPrincipal(); // Se ejecuta el ciclo del juego
 }
 
 void leerPokemonesBin()
@@ -174,12 +176,14 @@ void leerPokemonesBin()
   SPokemon *primero = NULL;
   SPokemon *anterior = NULL;
 
-  pokemones.seekg((jugador->game - 1) * sizeof(SPokemon) * 8);
+  pokemones.seekg((jugador->game - 1) * sizeof(SPokemon) * 8); // se usa * 8 por que cada jugador tiene 4 pokemones
 
   for (int i = 1; i <= 8; i++)
   {
     SPokemon *pokemon = new SPokemon;
     pokemones.read((char *)pokemon, sizeof(SPokemon));
+
+    // Se crea la lista doblemente enlazada
 
     pokemon->next = NULL;
     pokemon->previous = NULL;
@@ -225,7 +229,7 @@ void guardarPartida()
     return;
   }
 
-  jugadores.seekp((jugador->game - 1) * sizeof(SPlayer) * 2);
+  jugadores.seekp((jugador->game - 1) * sizeof(SPlayer) * 2); // se usa * 2 por que son dos jugadores
 
   jugadores.write((char *)jugador, sizeof(SPlayer));
   jugadores.write((char *)enemigo, sizeof(SPlayer));
@@ -259,7 +263,7 @@ void guardarPartida()
     actual = actual->next;
   } while (actual != enemigo->team);
 
-  // Borrar memoria
+  // Borrar memoria ya que es "Guardar y salir"
 
   actual = jugador->team;
 
@@ -307,11 +311,11 @@ void cargarPokemones(string path, SPlayer *p)
     file >> line;
 
     char *token;
-    token = strtok(line, "-");
+    token = strtok(line, "-"); // separa por cada pareja de atributo y valor
 
     while (token != NULL)
     {
-      char *valor = strstr(token, ":") + 1;
+      char *valor = strstr(token, ":") + 1; // Toma desde el siguiente apuntador a :
       char *atrib = token;
       int atribSize = strlen(token) - strlen(valor) - 1;
 
@@ -342,6 +346,8 @@ void cargarPokemones(string path, SPlayer *p)
     pokemon->game = partidasGuardadas;
     pokemon->mainPlayer = p->mainPlayer;
 
+    // Se crea la lista doblemente enlazada
+
     if (!primero)
       primero = pokemon;
     else
@@ -368,7 +374,6 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
 
   do
   {
-    // cout << "Direccion: " << actual << endl;
     cout << "+--------------------------------+" << endl;
     // if(i == h1 || i == 2) "  : " else "| "
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre:    " + (string)actual->name, 30) << " |" << endl;
@@ -376,8 +381,14 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Velocidad: " + to_string(actual->speed), 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nivel:     " + to_string(actual->level), 30) << " |" << endl;
+
+    // Couts comentados del desarrollo
+
+    // cout << "Direccion: " << actual << endl;
     // cout << "Siguiente: " << actual->next << endl;
     // cout << "Anterior:  " << actual->previous << endl
+
+
     actual = actual->next;
     i++;
   } while (actual != p->team);
@@ -386,6 +397,7 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
 
 void pause()
 {
+  // Va a esperar hasta que se envie un enter
   do
   {
     cout << '\n'
