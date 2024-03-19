@@ -52,6 +52,7 @@ void leerPokemonesBin();
 int contarPartidasGuardadas();
 void guardarPartida();
 void cargarPartida();
+SPokemon *anteriorVivo(SPokemon *actual);
 
 SPlayer *jugador = new SPlayer;
 SPlayer *enemigo = new SPlayer;
@@ -67,7 +68,7 @@ int main(void)
   *(opciones + 2) = "Salir";
 
   cout << "+--------------------------------------------------------------+" << endl;
-  cout << "|                           POKeMON                            |" << endl;
+  cout << "|                           POKEMON                            |" << endl;
   cout << "|                    Edicion Programacion                      |" << endl;
   cout << "|                                                              |" << endl;
   cout << "|                         PRESS START                          |" << endl;
@@ -369,6 +370,7 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
   {
     // cout << "Direccion: " << actual << endl;
     cout << "+--------------------------------+" << endl;
+    // if(i == h1 || i == 2) "  : " else "| "
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre:    " + (string)actual->name, 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
@@ -623,6 +625,20 @@ SPokemon *siguienteVivo(SPokemon *actual)
   return retorno;
 }
 
+SPokemon *anteriorVivo(SPokemon *actual)
+{
+  SPokemon *retorno = actual;
+
+  while (retorno->live <= 0)
+  {
+    retorno = retorno->previous;
+    if (retorno->name == actual->name)
+      break;
+  }
+
+  return retorno;
+}
+
 void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
 {
   SPokemon **primero = (*poke1)->speed > (*poke2)->speed ? poke1 : poke2;
@@ -773,8 +789,8 @@ void batallaPokemon()
 
 void cambiarPokemon(SPokemon **poke1, SPokemon **poke2)
 {
-  SPokemon *siguiente = (*poke1)->next;
-  SPokemon *anterior = (*poke1)->previous;
+  SPokemon *siguiente = siguienteVivo((*poke1)->next);
+  SPokemon *anterior = anteriorVivo((*poke1)->previous);
 
   // renderMessage("Quieres cambiar a (1) " + (string)siguiente->name + " o quieres enviar a (2) " + (string)anterior->name);
 
