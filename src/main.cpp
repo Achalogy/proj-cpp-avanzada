@@ -35,7 +35,7 @@ void menuPrincipal();
 void mostrarPokemones(SPlayer *jugador, int h1, int h2);
 string padEnd(string str, int size);
 string padStart(string str, int size);
-void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer);
+void cargarPokemones(string path, SPlayer *jugador);
 int contarPokemones(SPlayer *p);
 SPokemon *encontrarDirPokemon(SPlayer *p, int pos);
 void intercambiarPokemones();
@@ -92,9 +92,11 @@ int main(void)
       cargarPartida();
       break;
     case 3:
+      // Borrar memoria
+      delete jugador;
+      delete enemigo;
       clearConsole();
       return 0;
-      break;
 
     default:
       break;
@@ -117,7 +119,9 @@ int contarPartidasGuardadas()
   }
 
   jugadores.seekg(0, ios::end);
-  return (int)jugadores.tellg() / (sizeof(SPlayer) * 2);
+  int r = (int)jugadores.tellg() / (sizeof(SPlayer) * 2);
+  jugadores.close();
+  return r;
 }
 
 void cargarPartida()
@@ -153,6 +157,11 @@ void cargarPartida()
   leerPokemonesBin();
 
   renderMessage("Se ha cargado la partida con exito");
+
+  // Borrar memoria
+  jugadores.close();
+  delete[] opciones;
+
   pause();
   menuPrincipal();
 }
@@ -198,6 +207,8 @@ void leerPokemonesBin()
       enemigo->team = primero;
     }
   }
+
+  pokemones.close();
 }
 
 void guardarPartida()
@@ -207,8 +218,11 @@ void guardarPartida()
   jugadores.open("partidas.bin", ios::in | ios::out | ios::binary);
 
   if (!jugadores.is_open())
-    cout << "Error abriendo el archivo";
-  pause();
+  {
+    cout << "Error abriendo el archivo partidas.bin" << endl;
+    pause();
+    return;
+  }
 
   jugadores.seekp((jugador->game - 1) * sizeof(SPlayer) * 2);
 
@@ -219,16 +233,21 @@ void guardarPartida()
 
   pokemones.open("pokemones.bin", ios::in | ios::out | ios::binary);
 
+  if (!pokemones.is_open())
+  {
+    cout << "Error abriendo el archivo pokemones.bin" << endl;
+    pause();
+    return;
+  }
+
   pokemones.seekp((jugador->game - 1) * sizeof(SPokemon) * 8);
 
   SPokemon *actual = jugador->team;
-  int i = 0;
 
   do
   {
     pokemones.write((char *)actual, sizeof(SPokemon));
     actual = actual->next;
-    i++;
   } while (actual != jugador->team);
 
   actual = enemigo->team;
@@ -237,18 +256,37 @@ void guardarPartida()
   {
     pokemones.write((char *)actual, sizeof(SPokemon));
     actual = actual->next;
-    i++;
   } while (actual != enemigo->team);
+
+  // Borrar memoria
+
+  actual = jugador->team;
+
+  do
+  {
+    actual = actual->next;
+    delete actual->previous;
+  } while (actual != jugador->team);
+
+  actual = enemigo->team;
+
+  do
+  {
+    actual = actual->next;
+    delete actual->previous;
+  } while (actual != enemigo->team);
+
+  jugadores.close();
+  pokemones.close();
 
   renderMessage("La partida número " + to_string(jugador->game) + " ha sido guardada con exito");
   pause();
 }
 
-void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
+void cargarPokemones(string path, SPlayer *jugador)
 {
   ifstream file;
-  string line;
-  int a = 0;
+  char line[500];
 
   SPokemon *primero = NULL;
   SPokemon *anterior = NULL;
@@ -258,22 +296,17 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
   if (!file.is_open())
   {
     cout << "No se puede leer el archivo" << endl;
+    return;
   }
 
   while (!file.eof())
   {
     SPokemon *pokemon = new SPokemon;
 
-    getline(file, line);
-
-    if (line.back() == '\r')
-      line.pop_back();
-
-    char *lineC = (char *)line.c_str();
-    strcpy(lineC, line.c_str());
+    file >> line;
 
     char *token;
-    token = strtok(lineC, "-");
+    token = strtok(line, "-");
 
     while (token != NULL)
     {
@@ -306,7 +339,7 @@ void cargarPokemones(string path, SPlayer *jugador, bool mainPlayer)
     pokemon->next = NULL;
     pokemon->previous = NULL;
     pokemon->game = partidasGuardadas;
-    pokemon->mainPlayer = mainPlayer;
+    pokemon->mainPlayer = jugador->mainPlayer;
 
     if (!primero)
       primero = pokemon;
@@ -336,7 +369,7 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
   {
     // cout << "Dirección: " << actual << endl;
     cout << "+--------------------------------+" << endl;
-    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre: " + (string)actual->name, 30) << " |" << endl;
+    cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre:    " + (string)actual->name, 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Vida:      " + to_string(actual->live), 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Velocidad: " + to_string(actual->speed), 30) << " |" << endl;
@@ -392,8 +425,8 @@ void crearPartida()
   enemigo->team = NULL;
   enemigo->game = partidasGuardadas;
 
-  cargarPokemones("main.txt", jugador, true);
-  cargarPokemones("enemy.txt", enemigo, false);
+  cargarPokemones("main.txt", jugador);
+  cargarPokemones("enemy.txt", enemigo);
 
   renderMessage("De acuerdo, " + (string)nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
   pause();
@@ -492,12 +525,14 @@ void intercambiarPokemones()
   dir1->attack = dir2->attack;
   dir1->level = dir2->level;
   dir1->live = dir2->live;
+  dir1->maxLive = dir2->maxLive;
   strcpy(dir1->name, dir2->name);
   dir1->speed = dir2->speed;
 
   dir2->attack = aux.attack;
   dir2->level = aux.level;
   dir2->live = aux.live;
+  dir2->maxLive = aux.maxLive;
   strcpy(dir2->name, aux.name);
   dir2->speed = aux.speed;
 
@@ -727,6 +762,7 @@ void batallaPokemon()
       cambiarPokemon(&poke1, &poke2);
       break;
     case 3:
+      delete[] opcionesLucha;
       return;
 
     default:
@@ -766,6 +802,7 @@ void cambiarPokemon(SPokemon **poke1, SPokemon **poke2)
     *poke1 = anterior;
     break;
   default:
+    delete[] opciones;
     return;
   }
   pause();
@@ -798,6 +835,7 @@ void menuPrincipal()
       break;
     case 4:
       guardarPartida();
+      delete[] opciones;
       return;
       break;
     }
