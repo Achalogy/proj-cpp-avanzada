@@ -2,3 +2,5 @@ nombre:Pikachu-nivel:12-ataque:30-vida:100-velocidad:40
 velocidad:50-nombre:Charizard-nivel:13-ataque:35-vida:110
 nivel:15-ataque:40-vida:120-velocidad:70-nombre:Tauros
 ataque:30-vida:200-velocidad:70-nombre:Jigglypuff-nivel:10
+
+nombre:Pikachu

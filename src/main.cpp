@@ -67,8 +67,8 @@ int main(void)
   *(opciones + 2) = "Salir";
 
   cout << "+--------------------------------------------------------------+" << endl;
-  cout << "|                           POKÉMON                            |" << endl;
-  cout << "|                    Edición Programación                      |" << endl;
+  cout << "|                           POKeMON                            |" << endl;
+  cout << "|                    Edicion Programacion                      |" << endl;
   cout << "|                                                              |" << endl;
   cout << "|                         PRESS START                          |" << endl;
   cout << "|                       © 2024 Acha inc                        |" << endl;
@@ -81,7 +81,7 @@ int main(void)
   {
     clearConsole();
     int opt = crearMenuApuntadores(3, opciones);
-    cin.ignore(); // Ya que se envia un número
+    cin.ignore(); // Ya que se envia un numero
 
     switch (opt)
     {
@@ -279,11 +279,11 @@ void guardarPartida()
   jugadores.close();
   pokemones.close();
 
-  renderMessage("La partida número " + to_string(jugador->game) + " ha sido guardada con exito");
+  renderMessage("La partida numero " + to_string(jugador->game) + " ha sido guardada con exito");
   pause();
 }
 
-void cargarPokemones(string path, SPlayer *jugador)
+void cargarPokemones(string path, SPlayer *p)
 {
   ifstream file;
   char line[500];
@@ -339,7 +339,7 @@ void cargarPokemones(string path, SPlayer *jugador)
     pokemon->next = NULL;
     pokemon->previous = NULL;
     pokemon->game = partidasGuardadas;
-    pokemon->mainPlayer = jugador->mainPlayer;
+    pokemon->mainPlayer = p->mainPlayer;
 
     if (!primero)
       primero = pokemon;
@@ -353,7 +353,7 @@ void cargarPokemones(string path, SPlayer *jugador)
     primero->previous = pokemon;
   }
 
-  jugador->team = primero;
+  p->team = primero;
 
   file.close();
 }
@@ -367,7 +367,7 @@ void mostrarPokemones(SPlayer *p, int h1 = -1, int h2 = -1)
 
   do
   {
-    // cout << "Dirección: " << actual << endl;
+    // cout << "Direccion: " << actual << endl;
     cout << "+--------------------------------+" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Nombre:    " + (string)actual->name, 30) << " |" << endl;
     cout << (i == h1 || i == h2 ? "  : " : "| ") << padEnd("Ataque:    " + to_string(actual->attack), 30) << " |" << endl;
@@ -397,13 +397,13 @@ void crearPartida()
   char nombre[50];
 
   clearConsole();
-  renderMessage("¡Te doy la bienvenida al mundo de los Pokémon!");
+  renderMessage("¡Te doy la bienvenida al mundo de los Pokemon!");
   pause();
-  renderMessage("Me llamo Acha y soy el Profesor Pokémon de la región de Jave.");
+  renderMessage("Me llamo Acha y soy el Profesor Pokemon de la region de Jave.");
   pause();
-  renderMessage("¡Este mundo está lleno de unas criaturitas desdichadas (Álgebra) llamadas Pokémon!");
+  renderMessage("¡Este mundo esta lleno de unas criaturitas desdichadas (algebra) llamadas Pokemon!");
   pause();
-  renderMessage("Y ahora, háblame un poco de ti. Veamos... ¿Cómo te llamas?");
+  renderMessage("Y ahora, hablame un poco de ti. Veamos... ¿Como te llamas?");
   cout << endl
        << " > ";
 
@@ -418,7 +418,7 @@ void crearPartida()
   cin.ignore();
 
   clearConsole();
-  renderMessage("¿Así que te llamas " + (string)nombre + "?");
+  renderMessage("¿Asi que te llamas " + (string)nombre + "?");
   pause();
 
   strcpy(enemigo->name, "Alain");
@@ -428,9 +428,9 @@ void crearPartida()
   cargarPokemones("main.txt", jugador);
   cargarPokemones("enemy.txt", enemigo);
 
-  renderMessage("De acuerdo, " + (string)nombre + ". Estás a punto de dar tus primeros pasos en la región de Jave.");
+  renderMessage("De acuerdo, " + (string)nombre + ". Estas a punto de dar tus primeros pasos en la region de Jave.");
   pause();
-  renderMessage("¡Vivirás emocionantes aventuras junto a humanos y Pokémon!");
+  renderMessage("¡Viviras emocionantes aventuras junto a humanos y Pokemon!");
   pause();
 
   menuPrincipal();
@@ -478,7 +478,7 @@ void intercambiarPokemones()
   {
     clearConsole();
     mostrarPokemones(jugador);
-    renderMessage("¿Que posición inicial desea intercambiar? (0 para cancelar)");
+    renderMessage("¿Que posicion inicial desea intercambiar? (0 para cancelar)");
     cout << " > ";
     cin >> pos1;
     pos1--;
@@ -490,7 +490,7 @@ void intercambiarPokemones()
   {
     clearConsole();
     mostrarPokemones(jugador, pos1);
-    renderMessage("¿A que posición desea intercambiar? (0 para cancelar)");
+    renderMessage("¿A que posicion desea intercambiar? (0 para cancelar)");
     cout << " > ";
     cin >> pos2;
     pos2--;
@@ -666,7 +666,7 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
       renderMessage("¡Adelante, " + (string)(*segundo)->name + "!");
     }
     else
-      renderMessage("¡El campeón " + (string)enemigo->name + " ha enviado a " + (string)(*segundo)->name + "!");
+      renderMessage("¡El campeon " + (string)enemigo->name + " ha enviado a " + (string)(*segundo)->name + "!");
 
     pause();
   }
@@ -689,7 +689,7 @@ void realizarAtaque(SPokemon **poke1, SPokemon **poke2)
       renderMessage("¡Adelante, " + (string)(*primero)->name + "!");
     }
     else
-      renderMessage("¡El campeón " + (string)enemigo->name + " ha enviado a " + (string)(*primero)->name + "!");
+      renderMessage("¡El campeon " + (string)enemigo->name + " ha enviado a " + (string)(*primero)->name + "!");
 
     pause();
   }
@@ -705,9 +705,9 @@ void batallaPokemon()
     return; // Evitar problemas
 
   clearConsole();
-  renderMessage("Bienvenido. Me presentaré: soy " + (string)enemigo->name + ", el Campeon.");
+  renderMessage("Bienvenido. Me presentare: soy " + (string)enemigo->name + ", el Campeon.");
   pause();
-  renderMessage("Entonces, ¿tú eres de quien tanto hablaba el profesor Acha?");
+  renderMessage("Entonces, ¿tu eres de quien tanto hablaba el profesor Acha?");
   pause();
   renderMessage("Venga, disfrutemos de un intenso combate.");
   pause();
@@ -731,11 +731,11 @@ void batallaPokemon()
       renderBattle(poke1, poke2);
       if (pokemonesVivos(jugador) == 0)
       {
-        renderMessage("Tus pokemones han dado todo de si. Pero haz perdido en contra de mi, " + (string)enemigo->name + " el campeón.");
+        renderMessage("Tus pokemones han dado todo de si. Pero haz perdido en contra de mi, " + (string)enemigo->name + " el campeon.");
         renderMessage("Has perdido.");
       }
       else
-        renderMessage("¡El campeón " + (string)enemigo->name + " ha perdido!");
+        renderMessage("¡El campeon " + (string)enemigo->name + " ha perdido!");
       return;
     }
 
@@ -820,7 +820,7 @@ void menuPrincipal()
   while (true)
   {
     int opt = crearMenuApuntadores(4, opciones);
-    cin.ignore(); // Ya que se envia un número
+    cin.ignore(); // Ya que se envia un numero
 
     switch (opt)
     {
@@ -930,7 +930,7 @@ void renderMessage(string str)
 
 int crearMenuApuntadores(int cantOpciones, string *opciones)
 {
-  // Retorna el entero proporcionado por el usuario que identifica la opción elegida.
+  // Retorna el entero proporcionado por el usuario que identifica la opcion elegida.
 
   int opcionInput = -1;
 
@@ -945,7 +945,7 @@ int crearMenuApuntadores(int cantOpciones, string *opciones)
 
     cin >> opcionInput;
     cout << endl;
-    // Volver a enviar el menu en caso de no recibir una opción valida34
+    // Volver a enviar el menu en caso de no recibir una opcion valida
   } while (opcionInput <= 0 || opcionInput > cantOpciones);
 
   return opcionInput;
